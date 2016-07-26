@@ -1,0 +1,9 @@
+E:\Projects\SiteCrawler\UkadTask\Database\bin\Debug\Database.dacpac
+E:\Projects\SiteCrawler\UkadTask\Database\bin\Debug\Database.dll
+E:\Projects\SiteCrawler\UkadTask\Database\bin\Debug\Database.pdb
+E:\Projects\SiteCrawler\UkadTask\Database\obj\Debug\Model.xml
+E:\Projects\SiteCrawler\UkadTask\Database\obj\Debug\refactor.xml
+E:\Projects\SiteCrawler\UkadTask\Database\obj\Debug\postdeploy.sql
+E:\Projects\SiteCrawler\UkadTask\Database\obj\Debug\predeploy.sql
+E:\Projects\SiteCrawler\UkadTask\Database\obj\Debug\Database.dll
+E:\Projects\SiteCrawler\UkadTask\Database\obj\Debug\Database.pdb

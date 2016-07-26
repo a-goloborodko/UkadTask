@@ -1,0 +1,239 @@
+﻿@{
+    ViewBag.Title = "Ukad Task";
+}
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+<div id="chart">
+
+
+</div>
+
+<div id="tableresults">
+    <table class="table table-bordered table-condensed table-hover">
+        <thead>
+            <tr>
+                <td class="col-lg-6">Page Url</td>
+                <td class="col-lg-2">Current Session Response Time (ms)</td>
+                <td class="col-lg-2">Min Response time (ms)</td>
+                <td class="col-lg-2">Max Response time (ms)</td>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+<div id="historyResultCont">
+    <div id="historyTitle" class="h3 text-center"></div>
+    <div id="historyTable"></div>
+</div>
+
+@section Footer {
+    <div class="row">
+        <h5 class="col-lg-offset-2 col-md-offset-1 col-sm-offset-1 col-lg-8 col-md-10 col-xs-10">Find history for website</h5>
+        <div class="form-group col-lg-7 col-lg-offset-2 col-md-8 col-md-offset-1 col-sm-8 col-sm-offset-1">
+            <input type="text" class="form-control" id="historyUrl" placeholder="http://example.com">
+        </div>
+        <div class="col-lg-1 col-md-2 col-sm-2">
+            <button type="button" class="btn btn-success" id="getHistory">Find</button>
+        </div>
+    </div>
+}
+
+<script>
+    var table;
+    var header;
+    var error;
+    var loader;
+    var url;
+    var chartDiv;
+    var chart = null;
+    var historyResultCont;
+    var historyUrl;
+
+    function start() {
+        resetTable()
+        resetError();
+        startLoader();
+        resetChart();
+        resetHistory();
+
+        var urlValue = url.val();
+
+        $.ajax({
+            dataType: "json",
+            type: "POST",
+            url: '@Url.Action("MeasureSite", "home")',
+            data: "url=" + urlValue,
+            success: success
+        });
+    }
+
+    function success(data) {
+        if (data.Success) {
+            var length = data.Pages.length;
+            var html = "";
+
+            for (var i = 0; i < length; i++) {
+                html += "<tr>";
+                html += "<td>" + data.Pages[i].PageUrl + "</td>";
+                html += "<td>" + data.Pages[i].CurrentResponseTime + "</td>";
+                html += "<td>" + data.Pages[i].MinResponseTime + "</td>";
+                html += "<td>" + data.Pages[i].MaxResponseTime + "</td>";
+                html += "</tr>";
+            }
+            drawChart(data);
+
+            table.show();
+            table.find("tbody").html(html);
+        }
+            //show error
+        else {
+            error.html(data.Error);
+            error.css("visibility", "visible");
+        }
+        stopLoader();
+    }
+
+    function getHistory() {
+        resetTable()
+        resetError();
+        resetChart();
+
+        $.ajax({
+            dataType: "json",
+            type: "POST",
+            url: '@Url.Action("history", "home")',
+            data: "url=" + historyUrl.val(),
+            success: successHistory
+        });
+    }
+
+    function successHistory(data) {
+        if (data.Success) {
+            var historyTitle = historyResultCont.find("#historyTitle");
+            var historyTable = historyResultCont.find("#historyTable");
+            var length = data.Pages.length;
+            var html = "";
+
+            historyTitle.html( data.HostUrl);
+
+            for (var i = 0; i < length; i++) {
+                html += "<h5>" + data.Pages[i].Url + "</h5>";
+                html += "<table class='table table-bordered table-condensed table-hover'></thead><tr><th>Date</th><th>Response Time (ms)</th></tr></thead><tbody>";
+                var historyLength = data.Pages[i].History.length;
+
+                for (var j = 0; j < historyLength; j++) {
+                    html += "<tr><td>" + data.Pages[i].History[j].Date + "</td>";
+                    html += "<td>" + data.Pages[i].History[j].TimeResponse + "</td></tr>";
+                }
+                html += "</tbody></table>";
+            }
+
+            historyTable.html(html);
+            historyResultCont.show();
+        }
+            //show error
+        else {
+            resetChart();
+            resetError();
+            resetHistory();
+            resetTable();
+            error.html(data.Error);
+            error.css("visibility", "visible");
+        }
+    }
+
+    function resetError() {
+        error.empty();
+        error.css("visibility", "hidden");
+    }
+
+    function resetTable() {
+        table.hide().find("tbody").empty();
+    }
+
+    function startLoader() {
+        var urlField = header.find("div:nth-child(3)");
+        var startButton = header.find("div:nth-child(4)");
+
+        urlField.hide();
+        startButton.hide();
+        loader.show();
+    }
+
+    function stopLoader() {
+        var urlField = header.find("div:nth-child(3)");
+        var startButton = header.find("div:nth-child(4)");
+
+        loader.hide();
+        urlField.show();
+        startButton.show();
+    }
+
+    //****** document ready ******
+    $(document).ready(function () {
+        table = $("#tableresults");
+        error = $("#error");
+        header = $("#header");
+        loader = $("#loader");
+        historyResultCont = $("#historyResultCont");
+        historyUrl = $("#historyUrl");
+        url = $("#url");
+        chartDiv = $("#chart");
+
+        $("#start").on("click", start);
+        $("#getHistory").on("click", getHistory);
+    });
+
+    google.charts.load('current', { packages: ['corechart', 'bar'] });
+    //google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart(data) {
+
+        var height = data.Pages.length * 25 + 90;
+
+        dataTable = new google.visualization.DataTable();
+
+        var options = {
+            title: 'Pages Time Response',
+            height: height,
+            chartArea: { width: '50%', height: height - 90 },
+            hAxis: {
+                title: 'Milliseconds',
+                minValue: 0
+            },
+            bar: {
+                groupWidth: 8
+            },
+            vAxis: {
+                title: 'Pages'
+            },
+        };
+
+        if (chart == null)
+            chart = new google.visualization.BarChart(document.getElementById('chart'));
+
+        dataTable.addColumn('string', 'Page');
+        dataTable.addColumn('number', 'Time Response (ms)');
+
+        for (var i = 0; i < data.Pages.length; i++) {
+            var row = [data.Pages[i].PageUrl, data.Pages[i].CurrentResponseTime];
+
+            dataTable.addRow(row);
+        }
+        chart.draw(dataTable, options);
+    }
+
+    function resetChart() {
+        if (chart !== null)
+            chart.clearChart();
+    }
+
+    function resetHistory() {
+        historyResultCont.hide();
+        historyResultCont.find("#historyTitle").empty();
+        historyResultCont.find("#historyTable").empty();
+    }
+
+
+</script>

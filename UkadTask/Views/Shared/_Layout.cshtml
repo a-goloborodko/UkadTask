@@ -1,0 +1,58 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/bundles/jquery")
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="top"></div>
+            <!-- Header with url input -->
+            <div class="header" id="header">
+                <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-2">
+                    <h1 class="text-center">Ukad Task</h1>
+                    <h4 class="text-center">Enter a URL to test the load time of website</h4>
+                    <p class="h4 error" id="error"></p>
+                </div>
+                <div class="col-lg-8 col-lg-offset-2 col-md-8 col-md-offset-1 col-sm-8 col-sm-offset-1" id="loader">
+                    <p>
+                        <img src="~/fonts/loader.gif" alt="loading" /> <br />
+                        Please wait. It can take few minutes
+                    </p>
+                </div>
+                <div class="col-lg-7 col-lg-offset-2 col-md-8 col-md-offset-1 col-sm-8 col-sm-offset-1">
+                    <div class="form-group">
+                        <label for="usr">Url:</label>
+                        <input type="text" class="form-control" id="url" placeholder="http://example.com">
+                    </div>
+                </div>
+                <div class="col-lg-1 col-md-2 col-sm-2">
+                    <button type="submit" class="btn btn-success" id="start">START</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="mainContainer" class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-2">
+        <div class="row">
+            @RenderBody()
+        </div>
+    </div>
+
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-2">
+        @if (IsSectionDefined("Footer"))
+        {
+            @RenderSection("Footer")
+        }
+    </div>
+
+
+
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+</body>
+</html>
